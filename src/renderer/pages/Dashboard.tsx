@@ -192,8 +192,6 @@ function ChartArea({
 
   // 处理光标数据变化的辅助函数
   const handleCrosshairChange = (params: any) => {
-    console.log(params, 'params-onCrosshairChange');
-    
     if (params && params.crosshair.kLineData) {
       // 直接使用 KLineChart 返回的 kLineData
       const klineData = params.crosshair.kLineData;
@@ -232,11 +230,6 @@ function ChartArea({
           extraHeight += 120; // 默认高度
       }
     });
-    console.log(Math.max(baseHeight, baseHeight + extraHeight));
-    console.log(chartInstance.current,'chartInstance.current');
-    
-    // chartInstance.current.resize();
-    
     return Math.max(baseHeight, baseHeight + extraHeight);
   };
 
@@ -292,7 +285,7 @@ function ChartArea({
             callback(data)
           }
         })
-        
+
                           // 添加鼠标事件监听器
         if (onCursorDataChange) {
           chartInstance.current.subscribeAction('onCrosshairChange', handleCrosshairChange);
