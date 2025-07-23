@@ -1,11 +1,11 @@
 import React from 'react';
-import Home from './pages/Home';
+import Dashboard from './pages/Dashboard';
 import './App.css';
 
 export default function App() {
   return (
     <div>
-      <Home />  {/* 直接渲染 Home 组件 */}
+      <Dashboard />
     </div>
   );
 }

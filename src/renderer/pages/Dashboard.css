@@ -1,0 +1,527 @@
+/* Dashboard 主容器 */
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+  background-color: #1e1e1e;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  transition: all 0.3s ease;
+}
+
+.dashboard-container.light {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* 左侧控制面板 */
+.control-panel {
+  width: 280px;
+  background-color: #2a2a2a;
+  border-right: 1px solid #3a3a3a;
+  padding: 20px;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+}
+
+.dashboard-container.light .control-panel {
+  background-color: #f5f5f5;
+  border-right: 1px solid #e0e0e0;
+}
+
+.panel-section {
+  margin-bottom: 30px;
+}
+
+.panel-section h3 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #cccccc;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dashboard-container.light .panel-section h3 {
+  color: #666666;
+}
+
+/* 时间周期按钮 */
+.timeframe-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.timeframe-btn {
+  padding: 8px 12px;
+  background-color: #3a3a3a;
+  border: 1px solid #4a4a4a;
+  color: #cccccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.dashboard-container.light .timeframe-btn {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  color: #666666;
+}
+
+.timeframe-btn:hover {
+  background-color: #4a4a4a;
+  border-color: #5a5a5a;
+}
+
+.dashboard-container.light .timeframe-btn:hover {
+  background-color: #f0f0f0;
+  border-color: #d0d0d0;
+}
+
+.timeframe-btn.active {
+  background-color: #2962FF;
+  border-color: #2962FF;
+  color: #ffffff;
+}
+
+/* 技术指标列表 */
+.indicators-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.indicator-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.indicator-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #cccccc;
+}
+
+.dashboard-container.light .indicator-label {
+  color: #666666;
+}
+
+.indicator-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #2962FF;
+}
+
+.period-input {
+  width: 60px;
+  padding: 4px 8px;
+  background-color: #3a3a3a;
+  border: 1px solid #4a4a4a;
+  color: #ffffff;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.dashboard-container.light .period-input {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  color: #000000;
+}
+
+/* 图表设置 */
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 13px;
+  color: #cccccc;
+}
+
+.dashboard-container.light .setting-item {
+  color: #666666;
+}
+
+.setting-select {
+  padding: 4px 8px;
+  background-color: #3a3a3a;
+  border: 1px solid #4a4a4a;
+  color: #ffffff;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.dashboard-container.light .setting-select {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  color: #000000;
+}
+
+/* 快捷操作 */
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.action-btn {
+  padding: 8px 12px;
+  background-color: #3a3a3a;
+  border: 1px solid #4a4a4a;
+  color: #cccccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.dashboard-container.light .action-btn {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  color: #666666;
+}
+
+.action-btn:hover {
+  background-color: #4a4a4a;
+  border-color: #5a5a5a;
+  color: #ffffff;
+}
+
+.dashboard-container.light .action-btn:hover {
+  background-color: #f0f0f0;
+  border-color: #d0d0d0;
+  color: #000000;
+}
+
+/* 中间图表区域 */
+.chart-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #1e1e1e;
+  transition: all 0.3s ease;
+}
+
+.dashboard-container.light .chart-area {
+  background-color: #ffffff;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #3a3a3a;
+  transition: all 0.3s ease;
+}
+
+.dashboard-container.light .chart-header {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.symbol-info h2 {
+  margin: 0 0 5px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.dashboard-container.light .symbol-info h2 {
+  color: #000000;
+}
+
+.symbol-info .price {
+  font-size: 18px;
+  font-weight: 500;
+  color: #ffffff;
+  margin-right: 10px;
+  transition: all 0.3s ease;
+}
+
+.dashboard-container.light .symbol-info .price {
+  color: #000000;
+}
+
+.symbol-info .change {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.symbol-info .change.positive {
+  background-color: #26A69A;
+  color: #ffffff;
+}
+
+.symbol-info .change.negative {
+  background-color: #EF5350;
+  color: #ffffff;
+}
+
+.chart-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.control-btn {
+  padding: 8px 16px;
+  background-color: #3a3a3a;
+  border: 1px solid #4a4a4a;
+  color: #cccccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.dashboard-container.light .control-btn {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  color: #666666;
+}
+
+.control-btn:hover {
+  background-color: #4a4a4a;
+  border-color: #5a5a5a;
+}
+
+.dashboard-container.light .control-btn:hover {
+  background-color: #f0f0f0;
+  border-color: #d0d0d0;
+}
+
+.chart-container {
+  flex: 1;
+  padding: 20px;
+  position: relative;
+}
+
+/* KLineChart 容器样式 */
+.kline-chart {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* KLineChart 自定义样式 */
+.kline-chart canvas {
+  border-radius: 4px;
+}
+
+/* 右侧信息面板 */
+.info-panel {
+  width: 320px;
+  background-color: #2a2a2a;
+  border-left: 1px solid #3a3a3a;
+  padding: 20px;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+}
+
+.dashboard-container.light .info-panel {
+  background-color: #f5f5f5;
+  border-left: 1px solid #e0e0e0;
+}
+
+/* 市场信息 */
+.market-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 13px;
+  border-bottom: 1px solid #3a3a3a;
+  transition: all 0.3s ease;
+}
+
+.dashboard-container.light .info-row {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-row .price {
+  font-weight: 600;
+  color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.dashboard-container.light .info-row .price {
+  color: #000000;
+}
+
+.info-row .positive {
+  color: #26A69A;
+}
+
+.info-row .negative {
+  color: #EF5350;
+}
+
+/* 交易深度 */
+.depth-info {
+  font-size: 12px;
+}
+
+.depth-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #3a3a3a;
+  font-weight: 600;
+  color: #cccccc;
+  transition: all 0.3s ease;
+}
+
+.dashboard-container.light .depth-header {
+  border-bottom: 1px solid #e0e0e0;
+  color: #666666;
+}
+
+.depth-asks, .depth-bids {
+  margin-bottom: 15px;
+}
+
+.depth-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  padding: 4px 0;
+  font-size: 11px;
+}
+
+.depth-row.ask {
+  color: #EF5350;
+}
+
+.depth-row.bid {
+  color: #26A69A;
+}
+
+/* 最近成交 */
+.trades-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trade-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  padding: 4px 0;
+  font-size: 11px;
+  border-bottom: 1px solid #3a3a3a;
+  transition: all 0.3s ease;
+}
+
+.dashboard-container.light .trade-row {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.trade-row:last-child {
+  border-bottom: none;
+}
+
+.trade-time {
+  color: #999999;
+}
+
+.trade-price.positive {
+  color: #26A69A;
+}
+
+.trade-price.negative {
+  color: #EF5350;
+}
+
+.trade-amount {
+  color: #cccccc;
+  transition: all 0.3s ease;
+}
+
+.dashboard-container.light .trade-amount {
+  color: #666666;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .control-panel {
+    width: 240px;
+  }
+  
+  .info-panel {
+    width: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+  
+  .control-panel,
+  .info-panel {
+    width: 100%;
+    height: auto;
+  }
+  
+  .chart-area {
+    height: 400px;
+  }
+}
+
+/* 滚动条样式 */
+.control-panel::-webkit-scrollbar,
+.info-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.control-panel::-webkit-scrollbar-track,
+.info-panel::-webkit-scrollbar-track {
+  background: #2a2a2a;
+}
+
+.dashboard-container.light .control-panel::-webkit-scrollbar-track,
+.dashboard-container.light .info-panel::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+.control-panel::-webkit-scrollbar-thumb,
+.info-panel::-webkit-scrollbar-thumb {
+  background: #4a4a4a;
+  border-radius: 3px;
+}
+
+.dashboard-container.light .control-panel::-webkit-scrollbar-thumb,
+.dashboard-container.light .info-panel::-webkit-scrollbar-thumb {
+  background: #d0d0d0;
+}
+
+.control-panel::-webkit-scrollbar-thumb:hover,
+.info-panel::-webkit-scrollbar-thumb:hover {
+  background: #5a5a5a;
+}
+
+.dashboard-container.light .control-panel::-webkit-scrollbar-thumb:hover,
+.dashboard-container.light .info-panel::-webkit-scrollbar-thumb:hover {
+  background: #b0b0b0;
+} 
