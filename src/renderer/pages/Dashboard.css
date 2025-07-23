@@ -212,18 +212,18 @@
   background-color: #ffffff;
 }
 
-.chart-header {
+/* .chart-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px;
   border-bottom: 1px solid #3a3a3a;
   transition: all 0.3s ease;
-}
+} */
 
-.dashboard-container.light .chart-header {
+/* .dashboard-container.light .chart-header {
   border-bottom: 1px solid #e0e0e0;
-}
+} */
 
 .symbol-info h2 {
   margin: 0 0 5px 0;
@@ -302,14 +302,15 @@
   flex: 1;
   padding: 20px;
   position: relative;
+  min-height: 300px;
 }
 
 /* KLineChart 容器样式 */
 .kline-chart {
   width: 100%;
-  height: 100%;
   border-radius: 4px;
   overflow: hidden;
+  transition: height 0.3s ease;
 }
 
 /* KLineChart 自定义样式 */
@@ -488,7 +489,7 @@
 }
 
 /* 响应式设计 */
-@media (max-width: 1200px) {
+/* @media (max-width: 1200px) {
   .control-panel {
     width: 240px;
   }
@@ -496,57 +497,82 @@
   .info-panel {
     width: 280px;
   }
-}
+} */
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .dashboard-container {
-    flex-direction: column;
+    min-width: 1200px; /* 设置最小宽度确保内容不被压缩 */
+    overflow-x: auto; /* 只显示横向滚动条 */
+    overflow-y: hidden; /* 隐藏纵向滚动条 */
   }
-  
-  .control-panel,
+
+  /* 左侧控制面板固定宽度 */
+  .control-panel {
+    width: 200px;
+    min-width: 200px; /* 防止被压缩 */
+    flex-shrink: 0; /* 防止收缩 */
+  }
+
+  /* 右侧信息面板固定宽度 */
   .info-panel {
-    width: 100%;
-    height: auto;
+    width: 320px;
+    min-width: 320px; /* 防止被压缩 */
+    flex-shrink: 0; /* 防止收缩 */
   }
-  
+
+  /* 中间图表区域自适应 */
   .chart-area {
-    height: 400px;
+    flex: 1;
+    min-width: 300px; /* 确保图表有最小宽度 */
+  }
+
+  /* 图表容器样式调整 */
+  .chart-container {
+    min-width: 300px; /* 确保图表容器有最小宽度 */
   }
 }
 
 /* 滚动条样式 */
 .control-panel::-webkit-scrollbar,
-.info-panel::-webkit-scrollbar {
+.info-panel::-webkit-scrollbar,
+.dashboard-container::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 .control-panel::-webkit-scrollbar-track,
-.info-panel::-webkit-scrollbar-track {
+.info-panel::-webkit-scrollbar-track,
+.dashboard-container::-webkit-scrollbar-track {
   background: #2a2a2a;
 }
 
 .dashboard-container.light .control-panel::-webkit-scrollbar-track,
-.dashboard-container.light .info-panel::-webkit-scrollbar-track {
+.dashboard-container.light .info-panel::-webkit-scrollbar-track,
+.dashboard-container.light::-webkit-scrollbar-track {
   background: #f5f5f5;
 }
 
 .control-panel::-webkit-scrollbar-thumb,
-.info-panel::-webkit-scrollbar-thumb {
+.info-panel::-webkit-scrollbar-thumb,
+.dashboard-container::-webkit-scrollbar-thumb {
   background: #4a4a4a;
   border-radius: 3px;
 }
 
 .dashboard-container.light .control-panel::-webkit-scrollbar-thumb,
-.dashboard-container.light .info-panel::-webkit-scrollbar-thumb {
+.dashboard-container.light .info-panel::-webkit-scrollbar-thumb,
+.dashboard-container.light::-webkit-scrollbar-thumb {
   background: #d0d0d0;
 }
 
 .control-panel::-webkit-scrollbar-thumb:hover,
-.info-panel::-webkit-scrollbar-thumb:hover {
+.info-panel::-webkit-scrollbar-thumb:hover,
+.dashboard-container::-webkit-scrollbar-thumb:hover {
   background: #5a5a5a;
 }
 
 .dashboard-container.light .control-panel::-webkit-scrollbar-thumb:hover,
-.dashboard-container.light .info-panel::-webkit-scrollbar-thumb:hover {
+.dashboard-container.light .info-panel::-webkit-scrollbar-thumb:hover,
+.dashboard-container.light::-webkit-scrollbar-thumb:hover {
   background: #b0b0b0;
 } 

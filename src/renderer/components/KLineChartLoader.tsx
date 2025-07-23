@@ -3,11 +3,13 @@ import React, { useState, useEffect } from 'react';
 interface KLineChartLoaderProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
+  onLoadComplete?: () => void;
 }
 
 export const KLineChartLoader: React.FC<KLineChartLoaderProps> = ({ 
   children, 
-  fallback 
+  fallback,
+  onLoadComplete
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,6 +19,7 @@ export const KLineChartLoader: React.FC<KLineChartLoaderProps> = ({
       if (typeof window !== 'undefined' && window.klinecharts) {
         setIsLoaded(true);
         setIsLoading(false);
+        onLoadComplete?.();
       } else {
         // 如果还没加载，继续检查
         setTimeout(checkKLineChart, 100);
@@ -33,7 +36,7 @@ export const KLineChartLoader: React.FC<KLineChartLoaderProps> = ({
     }, 10000); // 10秒超时
 
     return () => clearTimeout(timeout);
-  }, [isLoaded]);
+  }, [isLoaded, onLoadComplete]);
 
   if (isLoading) {
     return (
@@ -42,11 +45,13 @@ export const KLineChartLoader: React.FC<KLineChartLoaderProps> = ({
         justifyContent: 'center',
         alignItems: 'center',
         height: '100%',
-        color: '#666666'
+        color: '#666666',
+        backgroundColor: '#1e1e1e',
+        borderRadius: '4px'
       }}>
-        <div>
-          <div>正在加载 KLineChart...</div>
-          <div style={{ fontSize: '12px', marginTop: '8px' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '16px', marginBottom: '8px' }}>正在加载 KLineChart...</div>
+          <div style={{ fontSize: '12px', color: '#888888' }}>
             请稍候
           </div>
         </div>
@@ -62,11 +67,13 @@ export const KLineChartLoader: React.FC<KLineChartLoaderProps> = ({
         alignItems: 'center',
         height: '100%',
         color: '#666666',
-        textAlign: 'center'
+        textAlign: 'center',
+        backgroundColor: '#1e1e1e',
+        borderRadius: '4px'
       }}>
         <div>
-          <div>KLineChart 加载失败</div>
-          <div style={{ fontSize: '12px', marginTop: '8px' }}>
+          <div style={{ fontSize: '16px', marginBottom: '8px' }}>KLineChart 加载失败</div>
+          <div style={{ fontSize: '12px', color: '#888888' }}>
             请检查网络连接或刷新页面
           </div>
         </div>

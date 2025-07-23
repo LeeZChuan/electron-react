@@ -177,6 +177,7 @@ function ChartArea({
 }) {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<any>(null);
+  const [isChartInitialized, setIsChartInitialized] = useState(false);
   
   // 计算价格变化
   const latestData = data[data.length - 1];
@@ -210,11 +211,41 @@ function ChartArea({
     }
   };
 
+  const calculateChartHeight = () => {
+    const baseHeight = 300; // 主图固定高度
+    const enabledIndicators = indicators.filter(ind => ind.enabled);
+    
+    let extraHeight = 0;
+    enabledIndicators.forEach(indicator => {
+      switch (indicator.name) {
+        case 'MACD':
+        case 'KDJ':
+        case 'RSI':
+          extraHeight += 100; // 独立附图，需要更多空间
+          break;
+        case 'MA':
+        case 'EMA':
+        case 'BOLL':
+          extraHeight += 80; // 叠加在主图上，需要较少空间
+          break;
+        default:
+          extraHeight += 120; // 默认高度
+      }
+    });
+    console.log(Math.max(baseHeight, baseHeight + extraHeight));
+    console.log(chartInstance.current,'chartInstance.current');
+    
+    // chartInstance.current.resize();
+    
+    return Math.max(baseHeight, baseHeight + extraHeight);
+  };
+
   // 初始化图表
   useEffect(() => {
     const klinecharts = getKLineChart();
     if (chartRef.current && !chartInstance.current && klinecharts) {
       try {
+        
         chartInstance.current = klinecharts.init(chartRef.current);
         
         // // 设置主题
@@ -255,9 +286,6 @@ function ChartArea({
         chartInstance.current.setSymbol({ ticker: '行情图坐标轴' })
         chartInstance.current.setPeriod({ span: 1, type: 'minute' })
         chartInstance.current.setBarSpace(2)
-
-        console.log(data,'data');
-        
         // 设置数据
         chartInstance.current.setDataLoader({
           getBars: ({ callback }: { callback: (data: KLineData[]) => void }) => {
@@ -265,15 +293,18 @@ function ChartArea({
           }
         })
         
-                  // 添加鼠标事件监听器
-          if (onCursorDataChange) {
-            chartInstance.current.subscribeAction('onCrosshairChange', handleCrosshairChange);
-            
-            // 鼠标离开图表时清除光标数据
-            chartInstance.current.subscribeAction('mouseLeave', () => {
-              onCursorDataChange(null);
-            });
-          }
+                          // 添加鼠标事件监听器
+        if (onCursorDataChange) {
+          chartInstance.current.subscribeAction('onCrosshairChange', handleCrosshairChange);
+          
+          // 鼠标离开图表时清除光标数据
+          chartInstance.current.subscribeAction('mouseLeave', () => {
+            onCursorDataChange(null);
+          });
+        }
+        
+        // 标记图表已初始化完成
+        setIsChartInitialized(true);
       } catch (error) {
         console.error('KLineChart 初始化失败:', error);
       }
@@ -352,6 +383,24 @@ function ChartArea({
       }
     }
   }, [theme, showGrid, showVolume]);
+
+  // 监听指标变化，更新图表高度
+  useEffect(() => {
+    if (chartInstance.current && isChartInitialized) {
+      try {
+        // 更新图表高度
+        const chartElement = chartRef.current;
+        if (chartElement) {
+          chartElement.style.height = `${calculateChartHeight()}px`;
+        }
+        
+        // 调用 KLineChart 的 resize 方法
+        chartInstance.current.resize();
+      } catch (error) {
+        console.error('图表高度更新失败:', error);
+      }
+    }
+  }, [indicators, isChartInitialized]);
 
   // 更新技术指标
   useEffect(() => {
@@ -436,7 +485,7 @@ function ChartArea({
 
   return (
     <div className="chart-area">
-      <div className="chart-header">
+      {/* <div className="chart-header">
         <div className="symbol-info">
           <h2>BTC/USDT</h2>
           <span className="price">${data[data.length - 1]?.close?.toFixed(2) || '0.00'}</span>
@@ -449,9 +498,9 @@ function ChartArea({
           <button className="control-btn">截图</button>
           <button className="control-btn">设置</button>
         </div>
-      </div>
+      </div> */}
       
-      <div className="chart-container">
+        <div className="chart-container">
         <div 
           ref={chartRef} 
           className="kline-chart"
@@ -461,7 +510,8 @@ function ChartArea({
             backgroundColor: theme === 'dark' ? '#1e1e1e' : '#ffffff'
           }}
         />
-        <KLineChartLoader>
+        {!isChartInitialized?
+        <KLineChartLoader onLoadComplete={() => console.log('KLineChart 库加载完成')}>
           <div 
             ref={chartRef} 
             className="kline-chart"
@@ -471,8 +521,10 @@ function ChartArea({
               backgroundColor: theme === 'dark' ? '#1e1e1e' : '#ffffff'
             }}
           />
-        </KLineChartLoader>
-      </div>
+        </KLineChartLoader>:
+        <></>
+      }
+        </div>
     </div>
   );
 }
