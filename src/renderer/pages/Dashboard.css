@@ -325,6 +325,7 @@
   padding: 20px;
   overflow-y: auto;
   transition: all 0.3s ease;
+  font-size: 13px;
 }
 
 .dashboard-container.light .info-panel {
@@ -373,6 +374,30 @@
 
 .info-row .negative {
   color: #EF5350;
+}
+
+/* 光标数据高亮 */
+.info-row.cursor-active {
+  background-color: rgba(41, 98, 255, 0.1);
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 2px 0;
+}
+
+.dashboard-container.light .info-row.cursor-active {
+  background-color: rgba(41, 98, 255, 0.05);
+}
+
+/* 操作提示样式 */
+.info-row.hint {
+  font-style: italic;
+  color: #888888;
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+.dashboard-container.light .info-row.hint {
+  color: #666666;
 }
 
 /* 交易深度 */

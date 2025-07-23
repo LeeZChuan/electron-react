@@ -2,10 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './Dashboard.css';
 import KLineChartLoader from '../components/KLineChartLoader';
 import { 
-  generateMockKlineData, 
-  generateDepthData, 
-  generateTradeData, 
-  generateMarketStats,
+  generateMockKlineData,
   type KLineData 
 } from '../utils/mockDataGenerator';
 
@@ -168,13 +165,15 @@ function ChartArea({
   indicators, 
   theme, 
   showGrid, 
-  showVolume 
+  showVolume,
+  onCursorDataChange
 }: { 
   data: KLineData[]; 
   indicators: typeof mockIndicators;
   theme: string;
   showGrid: boolean;
   showVolume: boolean;
+  onCursorDataChange?: (data: KLineData | null) => void;
 }) {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<any>(null);
@@ -188,6 +187,27 @@ function ChartArea({
   // 检查 KLineChart 是否已加载
   const isKLineChartLoaded = () => {
     return getKLineChart() !== null;
+  };
+
+  // 处理光标数据变化的辅助函数
+  const handleCrosshairChange = (params: any) => {
+    console.log(params, 'params-onCrosshairChange');
+    
+    if (params && params.crosshair.kLineData) {
+      // 直接使用 KLineChart 返回的 kLineData
+      const klineData = params.crosshair.kLineData;
+      const cursorData: KLineData = {
+        timestamp: klineData.timestamp,
+        open: klineData.open,
+        high: klineData.high,
+        low: klineData.low,
+        close: klineData.close,
+        volume: klineData.volume
+      };
+      onCursorDataChange?.(cursorData);
+    } else {
+      onCursorDataChange?.(null);
+    }
   };
 
   // 初始化图表
@@ -232,7 +252,7 @@ function ChartArea({
         //   }
         // });
 
-        chartInstance.current.setSymbol({ ticker: 'TestSymbol' })
+        chartInstance.current.setSymbol({ ticker: '行情图坐标轴' })
         chartInstance.current.setPeriod({ span: 1, type: 'minute' })
         chartInstance.current.setBarSpace(2)
 
@@ -244,6 +264,16 @@ function ChartArea({
             callback(data)
           }
         })
+        
+                  // 添加鼠标事件监听器
+          if (onCursorDataChange) {
+            chartInstance.current.subscribeAction('onCrosshairChange', handleCrosshairChange);
+            
+            // 鼠标离开图表时清除光标数据
+            chartInstance.current.subscribeAction('mouseLeave', () => {
+              onCursorDataChange(null);
+            });
+          }
       } catch (error) {
         console.error('KLineChart 初始化失败:', error);
       }
@@ -267,12 +297,12 @@ function ChartArea({
     const klinecharts = getKLineChart();
     if (chartInstance.current && klinecharts) {
       try {
-        // chartInstance.current.applyNewData(data);
+        // 更新数据
         chartInstance.current.setDataLoader({
           getBars: ({ callback }: { callback: (data: KLineData[]) => void }) => {
             callback(data)
           }
-        })
+        });
       } catch (error) {
         console.error('KLineChart 数据更新失败:', error);
       }
@@ -447,95 +477,148 @@ function ChartArea({
   );
 }
 
-// 右侧信息面板组件
-function InfoPanel({ data }: { data: KLineData[] }) {
-  const marketStats = generateMarketStats(data);
-  const depthData = generateDepthData(marketStats.currentPrice);
-  const tradeData = generateTradeData(marketStats.currentPrice, 10);
+// 右侧信息面板组件 - 动态显示光标位置数据
+function InfoPanel({ 
+  data, 
+  cursorData 
+}: { 
+  data: KLineData[];
+  cursorData?: KLineData | null;
+}) {
+  // 如果没有光标数据，显示最新数据
+  const displayData = cursorData || data[data.length - 1];
+  const prevData = data[data.length - 2];
+  
+  if (!displayData) {
+    return (
+      <div className="info-panel">
+        <div className="panel-section">
+          <h3>市场信息</h3>
+          <div className="market-info">
+            <div className="info-row">
+              <span>暂无数据</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const change = displayData.close - prevData.close;
+  const changePercent = prevData.close ? (change / prevData.close) * 100 : 0;
+  
+  // 计算时间范围内的统计数据
+  const getTimeRangeData = (minutes: number) => {
+    const endIndex = data.findIndex(d => d.timestamp >= displayData.timestamp);
+    const startIndex = Math.max(0, endIndex - minutes);
+    const rangeData = data.slice(startIndex, endIndex + 1);
+    
+    if (rangeData.length === 0) return { max: 0, min: 0, volume: 0 };
+    
+    return {
+      max: Math.max(...rangeData.map(d => d.high)),
+      min: Math.min(...rangeData.map(d => d.low)),
+      volume: rangeData.reduce((sum, d) => sum + d.volume, 0)
+    };
+  };
+
+  const data24h = getTimeRangeData(1440); // 24小时
+  const data1h = getTimeRangeData(60); // 1小时
+  
+  // 格式化时间
+  const formatTime = (timestamp: number) => {
+    const date = new Date(timestamp);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+  };
   
   return (
     <div className="info-panel">
       <div className="panel-section">
-        <h3>市场信息</h3>
+        <h3>光标位置数据</h3>
         <div className="market-info">
           <div className="info-row">
-            <span>最新价</span>
-            <span className="price">${marketStats.currentPrice.toLocaleString()}</span>
+            <span>时间</span>
+            <span>{formatTime(displayData.timestamp)}</span>
+          </div>
+          <div className="info-row">
+            <span>开盘价</span>
+            <span className="price">${displayData.open.toFixed(2)}</span>
+          </div>
+          <div className="info-row">
+            <span>最高价</span>
+            <span className="price">${displayData.high.toFixed(2)}</span>
+          </div>
+          <div className="info-row">
+            <span>最低价</span>
+            <span className="price">${displayData.low.toFixed(2)}</span>
+          </div>
+          <div className="info-row">
+            <span>收盘价</span>
+            <span className="price">${displayData.close.toFixed(2)}</span>
+          </div>
+          <div className="info-row">
+            <span>成交量</span>
+            <span>{displayData.volume.toLocaleString()}</span>
           </div>
           <div className="info-row">
             <span>涨跌额</span>
-            <span className={marketStats.change >= 0 ? 'positive' : 'negative'}>
-              {marketStats.change >= 0 ? '+' : ''}{marketStats.change.toFixed(2)}
+            <span className={change >= 0 ? 'positive' : 'negative'}>
+              {change >= 0 ? '+' : ''}{change.toFixed(2)}
             </span>
           </div>
           <div className="info-row">
             <span>涨跌幅</span>
-            <span className={marketStats.changePercent >= 0 ? 'positive' : 'negative'}>
-              {marketStats.changePercent >= 0 ? '+' : ''}{marketStats.changePercent.toFixed(2)}%
+            <span className={changePercent >= 0 ? 'positive' : 'negative'}>
+              {changePercent >= 0 ? '+' : ''}{changePercent.toFixed(2)}%
             </span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="panel-section">
+        <h3>统计信息</h3>
+        <div className="market-info">
+          <div className="info-row">
+            <span>1h最高</span>
+            <span>${data1h.max.toFixed(2)}</span>
+          </div>
+          <div className="info-row">
+            <span>1h最低</span>
+            <span>${data1h.min.toFixed(2)}</span>
+          </div>
+          <div className="info-row">
+            <span>1h成交量</span>
+            <span>{data1h.volume.toLocaleString()}</span>
           </div>
           <div className="info-row">
             <span>24h最高</span>
-            <span>${marketStats.max24h.toLocaleString()}</span>
+            <span>${data24h.max.toFixed(2)}</span>
           </div>
           <div className="info-row">
             <span>24h最低</span>
-            <span>${marketStats.min24h.toLocaleString()}</span>
+            <span>${data24h.min.toFixed(2)}</span>
           </div>
           <div className="info-row">
             <span>24h成交量</span>
-            <span>{marketStats.volume24h.toLocaleString()}</span>
+            <span>{data24h.volume.toLocaleString()}</span>
           </div>
         </div>
       </div>
       
-      <div className="panel-section">
-        <h3>交易深度</h3>
-        <div className="depth-info">
-          <div className="depth-header">
-            <span>价格</span>
-            <span>数量</span>
-            <span>累计</span>
-          </div>
-          <div className="depth-asks">
-            {depthData.asks.slice(0, 5).map((ask, i) => (
-              <div key={`ask-${i}`} className="depth-row ask">
-                <span>${ask.price}</span>
-                <span>{ask.amount}</span>
-                <span>{ask.total}</span>
-              </div>
-            ))}
-          </div>
-          <div className="depth-bids">
-            {depthData.bids.slice(0, 5).map((bid, i) => (
-              <div key={`bid-${i}`} className="depth-row bid">
-                <span>${bid.price}</span>
-                <span>{bid.amount}</span>
-                <span>{bid.total}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      
-      <div className="panel-section">
-        <h3>最近成交</h3>
-        <div className="trades-list">
-          {tradeData.map((trade, i) => (
-            <div key={i} className="trade-row">
-              <span className="trade-time">
-                {trade.time.getHours().toString().padStart(2, '0')}:
-                {trade.time.getMinutes().toString().padStart(2, '0')}:
-                {trade.time.getSeconds().toString().padStart(2, '0')}
-              </span>
-              <span className={`trade-price ${trade.type === 'buy' ? 'positive' : 'negative'}`}>
-                ${trade.price}
-              </span>
-              <span className="trade-amount">{trade.amount}</span>
+              <div className="panel-section">
+          <h3>操作提示</h3>
+          <div className="market-info">
+            <div className="info-row hint">
+              <span>在图表上移动鼠标查看详细数据</span>
             </div>
-          ))}
+            <div className="info-row hint">
+              <span>滚动鼠标滚轮缩放图表</span>
+            </div>
+            <div className="info-row hint">
+              <span>拖拽图表平移视图</span>
+            </div>
+          </div>
         </div>
-      </div>
     </div>
   );
 }
@@ -547,6 +630,7 @@ function DashboardLayout() {
   const [theme, setTheme] = useState('dark');
   const [showGrid, setShowGrid] = useState(true);
   const [showVolume, setShowVolume] = useState(true);
+  const [cursorData, setCursorData] = useState<KLineData | null>(null);
   
   const handleIndicatorToggle = (index: number) => {
     const newIndicators = [...indicators];
@@ -638,8 +722,9 @@ function DashboardLayout() {
         theme={theme}
         showGrid={showGrid}
         showVolume={showVolume}
+        onCursorDataChange={setCursorData}
       />
-      <InfoPanel data={klineData} />
+      <InfoPanel data={klineData} cursorData={cursorData} />
     </div>
   );
 }
