@@ -251,8 +251,8 @@ function ChartArea({
           styles:{
             candle:{
               tooltip:{
-                showRule:'rect',
-                showType:'none',
+                showRule:'follow_cross',
+                showType:'rect',
               }
             }
           },
