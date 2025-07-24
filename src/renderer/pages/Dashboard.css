@@ -300,9 +300,12 @@
 
 .chart-container {
   flex: 1;
-  padding: 20px;
+  padding:  0px 20px;
   position: relative;
   min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* 防止内容溢出 */
 }
 
 /* KLineChart 容器样式 */
@@ -311,6 +314,7 @@
   border-radius: 4px;
   overflow: hidden;
   transition: height 0.3s ease;
+  flex-shrink: 0; /* 防止高度被压缩 */
 }
 
 /* KLineChart 自定义样式 */

@@ -2,7 +2,7 @@
 declare global {
   interface Window {
     klinecharts: {
-      init: (container: HTMLElement) => KLineChart;
+      init: (container: HTMLElement,option?:any) => KLineChart;
       dispose: (container: HTMLElement) => void;
     };
   }

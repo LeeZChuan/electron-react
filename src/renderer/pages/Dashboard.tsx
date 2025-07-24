@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import './Dashboard.css';
 import KLineChartLoader from '../components/KLineChartLoader';
 import { 
@@ -209,37 +209,65 @@ function ChartArea({
     }
   };
 
-  const calculateChartHeight = () => {
-    const baseHeight = 300; // 主图固定高度
-    const enabledIndicators = indicators.filter(ind => ind.enabled);
+  // 使用 useMemo 缓存高度计算结果，只有指标变化时才重新计算
+  const chartHeight = useMemo(() => {
+    // 主图固定高度，不再根据容器动态调整
+    const mainChartHeight = 400; // 主K线图固定高度
     
-    let extraHeight = 0;
-    enabledIndicators.forEach(indicator => {
-      switch (indicator.name) {
-        case 'MACD':
-        case 'KDJ':
-        case 'RSI':
-          extraHeight += 100; // 独立附图，需要更多空间
-          break;
-        case 'MA':
-        case 'EMA':
-        case 'BOLL':
-          extraHeight += 80; // 叠加在主图上，需要较少空间
-          break;
-        default:
-          extraHeight += 120; // 默认高度
-      }
+    // 计算启用的指标
+    const enabledIndicators = indicators.filter(ind => ind.enabled);
+    const overlayIndicators = enabledIndicators.filter(ind => 
+      ['MA', 'EMA'].includes(ind.name)
+    );
+    const subIndicators = enabledIndicators.filter(ind => 
+      ['MACD', 'KDJ', 'RSI','BOLL'].includes(ind.name)
+    );
+    
+    // 叠加指标不占用额外高度，只需要少量空间用于图例
+    const overlayHeight = overlayIndicators.length > 0 ? 0 : 0;
+    
+    // 副图指标每个占用固定高度
+    const subIndicatorHeight = 120; // 增加副图高度，让指标显示更清晰
+    const totalSubHeight = subIndicators.length * subIndicatorHeight;
+    
+    // 计算总高度：主图 + 叠加指标图例 + 副图指标
+    const totalHeight = mainChartHeight + overlayHeight + totalSubHeight;
+    
+    console.log('重新计算图表高度:', totalHeight, '指标数量:', {
+      overlay: overlayIndicators.length,
+      sub: subIndicators.length
     });
-    return Math.max(baseHeight, baseHeight + extraHeight);
-  };
+    
+    return Math.round(totalHeight);
+  }, [indicators]); // 只依赖 indicators，只有指标变化时才重新计算
 
   // 初始化图表
   useEffect(() => {
     const klinecharts = getKLineChart();
     if (chartRef.current && !chartInstance.current && klinecharts) {
       try {
+
+        const option={
+          styles:{
+            candle:{
+              tooltip:{
+                showRule:'rect',
+                showType:'none',
+              }
+            }
+          },
+          layout:[{
+            type:'candle',
+            options:{
+              height:300,
+              axis:{
+                name:'customYAxis',
+              }
+            }
+          }]
+        }
+        chartInstance.current = klinecharts.init(chartRef.current,option);
         
-        chartInstance.current = klinecharts.init(chartRef.current);
         
         // // 设置主题
         // chartInstance.current.setStyles({
@@ -377,23 +405,32 @@ function ChartArea({
     }
   }, [theme, showGrid, showVolume]);
 
-  // 监听指标变化，更新图表高度
-  useEffect(() => {
-    if (chartInstance.current && isChartInitialized) {
+  // 更新图表高度的函数
+  const updateChartHeight = useCallback(() => {
+    if (chartInstance.current && isChartInitialized && chartRef.current) {
       try {
-        // 更新图表高度
         const chartElement = chartRef.current;
-        if (chartElement) {
-          chartElement.style.height = `${calculateChartHeight()}px`;
-        }
         
-        // 调用 KLineChart 的 resize 方法
-        chartInstance.current.resize();
+        console.log(chartHeight, 'newHeight from useMemo');
+        // 直接使用缓存的高度值，不需要容差检查（因为是基于指标数量的确定计算）
+        chartElement.style.height = `${chartHeight}px`;
+        
+        // 延迟调用resize确保DOM更新完成
+        setTimeout(() => {
+          if (chartInstance.current) {
+            chartInstance.current.resize();
+          }
+        }, 100);
       } catch (error) {
         console.error('图表高度更新失败:', error);
       }
     }
-  }, [indicators, isChartInitialized]);
+  }, [isChartInitialized, chartHeight]); // 依赖chartHeight而不是indicators
+
+  // 监听指标变化，更新图表高度
+  useEffect(() => {
+    updateChartHeight();
+  }, [updateChartHeight]); // 只依赖updateChartHeight，它内部已经依赖了chartHeight
 
   // 更新技术指标
   useEffect(() => {
@@ -417,7 +454,7 @@ function ChartArea({
                     size: 1
                   }]
                 }
-              });
+              },{ id: 'candle_pane' });
             } else if (indicator.name === 'EMA') {
               chartInstance.current.createIndicator('EMA', {
                 id: 'EMA',
@@ -442,7 +479,7 @@ function ChartArea({
                     { color: indicator.color, size: 1 }
                   ]
                 }
-              });
+              },{ id: 'candle_pane' });
             } else if (indicator.name === 'MACD') {
               chartInstance.current.createIndicator('MACD', {
                 id: 'MACD',
@@ -478,20 +515,6 @@ function ChartArea({
 
   return (
     <div className="chart-area">
-      {/* <div className="chart-header">
-        <div className="symbol-info">
-          <h2>BTC/USDT</h2>
-          <span className="price">${data[data.length - 1]?.close?.toFixed(2) || '0.00'}</span>
-          <span className={`change ${changePercent >= 0 ? 'positive' : 'negative'}`}>
-            {changePercent >= 0 ? '+' : ''}{changePercent.toFixed(2)}%
-          </span>
-        </div>
-        <div className="chart-controls">
-          <button className="control-btn">全屏</button>
-          <button className="control-btn">截图</button>
-          <button className="control-btn">设置</button>
-        </div>
-      </div> */}
       
         <div className="chart-container">
         <div 
@@ -499,24 +522,24 @@ function ChartArea({
           className="kline-chart"
           style={{ 
             width: '100%', 
-            height: '100%',
+            height: isChartInitialized ? `${chartHeight}px` : '400px',
             backgroundColor: theme === 'dark' ? '#1e1e1e' : '#ffffff'
           }}
         />
-        {!isChartInitialized?
+        {/* {!isChartInitialized?
         <KLineChartLoader onLoadComplete={() => console.log('KLineChart 库加载完成')}>
           <div 
             ref={chartRef} 
             className="kline-chart"
             style={{ 
               width: '100%', 
-              height: '100%',
+              height: '400px',
               backgroundColor: theme === 'dark' ? '#1e1e1e' : '#ffffff'
             }}
           />
         </KLineChartLoader>:
         <></>
-      }
+      } */}
         </div>
     </div>
   );
