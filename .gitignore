@@ -24,6 +24,8 @@ release/build-mac
 release/build-win
 .erb/dll
 
+package-lock.json
+
 .idea
 npm-debug.log.*
 *.css.d.ts
