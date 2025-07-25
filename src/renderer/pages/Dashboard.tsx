@@ -179,11 +179,6 @@ function ChartArea({
   const chartInstance = useRef<any>(null);
   const [isChartInitialized, setIsChartInitialized] = useState(false);
   
-  // 计算价格变化
-  const latestData = data[data.length - 1];
-  const prevData = data[data.length - 2];
-  const change = latestData?.close - prevData?.close || 0;
-  const changePercent = prevData?.close ? (change / prevData.close) * 100 : 0;
 
   // 检查 KLineChart 是否已加载
   const isKLineChartLoaded = () => {
@@ -226,9 +221,20 @@ function ChartArea({
     // 叠加指标不占用额外高度，只需要少量空间用于图例
     const overlayHeight = overlayIndicators.length > 0 ? 0 : 0;
     
-    // 副图指标每个占用固定高度
-    const subIndicatorHeight = 120; // 增加副图高度，让指标显示更清晰
-    const totalSubHeight = subIndicators.length * subIndicatorHeight;
+    // 定义不同指标的高度配置（与useEffect中保持一致）
+    const indicatorHeightConfig: { [key: string]: number } = {
+      'MA':300,
+      'EMA':300,
+      'BOLL': 120,  // 布林带需要显示上中下轨，高度适中
+      'MACD': 100,  // MACD显示柱状图和线，高度稍小
+      'KDJ': 100,   // KDJ显示三条线，高度稍小
+      'RSI': 80,    // RSI只显示一条线，高度最小
+    };
+    
+    // 计算副图指标的总高度（根据每个指标的实际配置高度）
+    const totalSubHeight = subIndicators.reduce((total, indicator) => {
+      return total + (indicatorHeightConfig[indicator.name] || 100); // 默认100px
+    }, 0);
     
     // 计算总高度：主图 + 叠加指标图例 + 副图指标
     const totalHeight = mainChartHeight + overlayHeight + totalSubHeight;
@@ -259,7 +265,8 @@ function ChartArea({
           layout:[{
             type:'candle',
             options:{
-              height:300,
+              height:100,
+              minHeight:100,
               axis:{
                 name:'customYAxis',
               }
@@ -269,40 +276,40 @@ function ChartArea({
         chartInstance.current = klinecharts.init(chartRef.current,option);
         
         
-        // // 设置主题
-        // chartInstance.current.setStyles({
-        //   grid: {
-        //     show: showGrid,
-        //     horizontal: {
-        //       show: showGrid,
-        //       color: theme === 'dark' ? '#3a3a3a' : '#e0e0e0',
-        //       size: 1
-        //     },
-        //     vertical: {
-        //       show: showGrid,
-        //       color: theme === 'dark' ? '#3a3a3a' : '#e0e0e0',
-        //       size: 1
-        //     }
-        //   },
-        //   candle: {
-        //     priceMark: {
-        //       show: true,
-        //       high: {
-        //         show: true,
-        //         color: theme === 'dark' ? '#cccccc' : '#666666'
-        //       },
-        //       low: {
-        //         show: true,
-        //         color: theme === 'dark' ? '#cccccc' : '#666666'
-        //       }
-        //     }
-        //   },
-        //   indicator: {
-        //     bars: {
-        //       show: showVolume
-        //     }
-        //   }
-        // });
+        // 设置主题
+        chartInstance.current.setStyles({
+          grid: {
+            show: showGrid,
+            horizontal: {
+              show: showGrid,
+              color: theme === 'dark' ? '#3a3a3a' : '#e0e0e0',
+              size: 1
+            },
+            vertical: {
+              show: showGrid,
+              color: theme === 'dark' ? '#3a3a3a' : '#e0e0e0',
+              size: 1
+            }
+          },
+          candle: {
+            priceMark: {
+              show: true,
+              high: {
+                show: true,
+                color: theme === 'dark' ? '#cccccc' : '#666666'
+              },
+              low: {
+                show: true,
+                color: theme === 'dark' ? '#cccccc' : '#666666'
+              }
+            }
+          },
+          indicator: {
+            bars: {
+              show: showVolume
+            }
+          }
+        });
 
         chartInstance.current.setSymbol({ ticker: '行情图坐标轴' })
         chartInstance.current.setPeriod({ span: 1, type: 'minute' })
@@ -406,31 +413,31 @@ function ChartArea({
   }, [theme, showGrid, showVolume]);
 
   // 更新图表高度的函数
-  const updateChartHeight = useCallback(() => {
-    if (chartInstance.current && isChartInitialized && chartRef.current) {
-      try {
-        const chartElement = chartRef.current;
+  // const updateChartHeight = useCallback(() => {
+  //   if (chartInstance.current && isChartInitialized && chartRef.current) {
+  //     try {
+  //       const chartElement = chartRef.current;
         
-        console.log(chartHeight, 'newHeight from useMemo');
-        // 直接使用缓存的高度值，不需要容差检查（因为是基于指标数量的确定计算）
-        chartElement.style.height = `${chartHeight}px`;
+  //       console.log(chartHeight, 'newHeight from useMemo');
+  //       // 直接使用缓存的高度值，不需要容差检查（因为是基于指标数量的确定计算）
+  //       chartElement.style.height = `${chartHeight}px`;
         
-        // 延迟调用resize确保DOM更新完成
-        setTimeout(() => {
-          if (chartInstance.current) {
-            chartInstance.current.resize();
-          }
-        }, 100);
-      } catch (error) {
-        console.error('图表高度更新失败:', error);
-      }
-    }
-  }, [isChartInitialized, chartHeight]); // 依赖chartHeight而不是indicators
+  //       // 延迟调用resize确保DOM更新完成
+  //       setTimeout(() => {
+  //         if (chartInstance.current) {
+  //           chartInstance.current.resize();
+  //         }
+  //       }, 100);
+  //     } catch (error) {
+  //       console.error('图表高度更新失败:', error);
+  //     }
+  //   }
+  // }, [isChartInitialized, chartHeight]); // 依赖chartHeight而不是indicators
 
   // 监听指标变化，更新图表高度
-  useEffect(() => {
-    updateChartHeight();
-  }, [updateChartHeight]); // 只依赖updateChartHeight，它内部已经依赖了chartHeight
+  // useEffect(() => {
+  //   updateChartHeight();
+  // }, [updateChartHeight]); // 只依赖updateChartHeight，它内部已经依赖了chartHeight
 
   // 更新技术指标
   useEffect(() => {
@@ -440,11 +447,24 @@ function ChartArea({
         // 清除所有指标
         chartInstance.current.removeIndicator();
         
+        // 定义不同指标的面板高度配置
+        const indicatorHeightConfig: { [key: string]: number } = {
+          'MA':300,
+          'EMA':300,
+          'BOLL': 120,  // 布林带需要显示上中下轨，高度适中
+          'MACD': 100,  // MACD显示柱状图和线，高度稍小
+          'KDJ': 100,   // KDJ显示三条线，高度稍小
+          'RSI': 80,    // RSI只显示一条线，高度最小
+        };
+        
         // 添加启用的指标
         indicators.forEach(indicator => {
           if (indicator.enabled) {
+            let paneId = null; // 存储创建的面板ID
+            
             if (indicator.name === 'MA') {
-              chartInstance.current.createIndicator('MA', {
+              // MA指标叠加在主图上，指定candle_pane
+              paneId = chartInstance.current.createIndicator('MA', {
                 id: 'MA',
                 calcParams: [indicator.period],
                 precision: 2,
@@ -454,9 +474,12 @@ function ChartArea({
                     size: 1
                   }]
                 }
-              },{ id: 'candle_pane' });
+              }, { id: 'candle_pane' });
+     
+              
             } else if (indicator.name === 'EMA') {
-              chartInstance.current.createIndicator('EMA', {
+              // EMA指标叠加在主图上，指定candle_pane
+              paneId = chartInstance.current.createIndicator('EMA', {
                 id: 'EMA',
                 calcParams: [indicator.period],
                 precision: 2,
@@ -466,9 +489,11 @@ function ChartArea({
                     size: 1
                   }]
                 }
-              });
+              }, { id: 'candle_pane' });
+              
             } else if (indicator.name === 'BOLL') {
-              chartInstance.current.createIndicator('BOLL', {
+              // BOLL指标创建独立副图
+              paneId = chartInstance.current.createIndicator('BOLL', {
                 id: 'BOLL',
                 calcParams: [indicator.period, 2],
                 precision: 2,
@@ -479,21 +504,51 @@ function ChartArea({
                     { color: indicator.color, size: 1 }
                   ]
                 }
-              },{ id: 'candle_pane' });
+              });
+              
+              // 设置BOLL面板高度
+              if (paneId) {
+                chartInstance.current.setPaneOptions({
+                  id: paneId,
+                  height: indicatorHeightConfig['BOLL']
+                });
+              }
+              
             } else if (indicator.name === 'MACD') {
-              chartInstance.current.createIndicator('MACD', {
+              // MACD指标创建独立副图
+              paneId = chartInstance.current.createIndicator('MACD', {
                 id: 'MACD',
                 calcParams: [12, 26, 9],
                 precision: 2
               });
+              
+              // 设置MACD面板高度
+              if (paneId) {
+                chartInstance.current.setPaneOptions({
+                  id: paneId,
+                  height: indicatorHeightConfig['MACD']
+                });
+              }
+              
             } else if (indicator.name === 'KDJ') {
-              chartInstance.current.createIndicator('KDJ', {
+              // KDJ指标创建独立副图
+              paneId = chartInstance.current.createIndicator('KDJ', {
                 id: 'KDJ',
                 calcParams: [9, 3, 3],
                 precision: 2
               });
+              
+              // 设置KDJ面板高度
+              if (paneId) {
+                chartInstance.current.setPaneOptions({
+                  id: paneId,
+                  height: indicatorHeightConfig['KDJ']
+                });
+              }
+              
             } else if (indicator.name === 'RSI') {
-              chartInstance.current.createIndicator('RSI', {
+              // RSI指标创建独立副图
+              paneId = chartInstance.current.createIndicator('RSI', {
                 id: 'RSI',
                 calcParams: [indicator.period],
                 precision: 2,
@@ -504,6 +559,14 @@ function ChartArea({
                   }]
                 }
               });
+              
+              // 设置RSI面板高度
+              if (paneId) {
+                chartInstance.current.setPaneOptions({
+                  id: paneId,
+                  height: indicatorHeightConfig['RSI']
+                });
+              }
             }
           }
         });
@@ -522,7 +585,7 @@ function ChartArea({
           className="kline-chart"
           style={{ 
             width: '100%', 
-            height: isChartInitialized ? `${chartHeight}px` : '400px',
+            height: '100%',
             backgroundColor: theme === 'dark' ? '#1e1e1e' : '#ffffff'
           }}
         />
