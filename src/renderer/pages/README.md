@@ -16,9 +16,6 @@ pages/
 ├── Home/            # 首页
 │   ├── index.tsx    # 主组件
 │   └── README.md    # 文档说明
-├── Abort/           # 关于页面
-│   ├── index.tsx    # 主组件
-│   └── README.md    # 文档说明
 └── README.md        # 本文件
 ```
 
@@ -36,7 +33,6 @@ pages/
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
-import Abort from './pages/Abort';
 ```
 
 ## 优势

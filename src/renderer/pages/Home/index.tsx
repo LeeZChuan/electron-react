@@ -1,7 +1,5 @@
 import React from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
-import About from './Abort';
-import Messages from './Dashboard';
 
 export default function Home() {
   return (
@@ -25,8 +23,6 @@ export default function Home() {
       {/* 这里处理 Home 组件的内部路由 */}
       <Routes>
         <Route path="/" element={<div>Welcome to Home Page!</div>} />
-        <Route path="about" element={<About />} />
-        <Route path="dashboard/messages" element={<Messages />} />
       </Routes>
     </div>
   );
