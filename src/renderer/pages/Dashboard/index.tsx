@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import './Dashboard.css';
-import KLineChartLoader from '../components/KLineChartLoader';
+import './styles.css';
+import KLineChartLoader from '../../components/KLineChartLoader';
 import { 
   generateMockKlineData,
   type KLineData 
-} from '../utils/mockDataGenerator';
+} from '../../utils/mockDataGenerator';
+import { User } from '../../utils/auth';
 
 // 从全局变量获取 KLineChart 函数
 const getKLineChart = () => {
@@ -36,6 +37,26 @@ const mockTimeframes = [
   { name: '1d', value: '1d' },
   { name: '1w', value: '1w' },
 ];
+
+// 用户信息头部组件
+function UserHeader({ user, onLogout }: { user: User | null; onLogout: () => void }) {
+  return (
+    <div className="user-header">
+      <div className="user-info">
+        <div className="user-avatar">
+          {user?.username?.charAt(0).toUpperCase() || 'U'}
+        </div>
+        <div className="user-details">
+          <div className="user-name">{user?.username || '用户'}</div>
+          <div className="user-role">{user?.role === 'admin' ? '管理员' : '普通用户'}</div>
+        </div>
+      </div>
+      <button className="logout-button" onClick={onLogout}>
+        退出登录
+      </button>
+    </div>
+  );
+}
 
 // 左侧控制面板组件
 function ControlPanel({ 
@@ -754,7 +775,12 @@ function InfoPanel({
   );
 }
 
-function DashboardLayout() {
+interface DashboardLayoutProps {
+  onLogout?: () => void;
+  currentUser?: User | null;
+}
+
+function DashboardLayout({ onLogout, currentUser }: DashboardLayoutProps) {
   const [indicators, setIndicators] = useState(mockIndicators);
   const [selectedTimeframe, setSelectedTimeframe] = useState('1h');
   const [klineData, setKlineData] = useState<KLineData[]>(mockKlineData);
@@ -762,6 +788,7 @@ function DashboardLayout() {
   const [showGrid, setShowGrid] = useState(true);
   const [showVolume, setShowVolume] = useState(true);
   const [cursorData, setCursorData] = useState<KLineData | null>(null);
+
   
   const handleIndicatorToggle = (index: number) => {
     const newIndicators = [...indicators];
@@ -827,39 +854,53 @@ function DashboardLayout() {
     localStorage.setItem('klineChartSettings', JSON.stringify(settings));
     alert('设置已保存！');
   };
-  
+
+  const handleLogout = () => {
+    if (onLogout) {
+      onLogout();
+    }
+  };
+
   return (
     <div className={`dashboard-container ${theme}`}>
-      <ControlPanel
-        indicators={indicators}
-        timeframes={mockTimeframes}
-        selectedTimeframe={selectedTimeframe}
-        onIndicatorToggle={handleIndicatorToggle}
-        onTimeframeChange={handleTimeframeChange}
-        onPeriodChange={handlePeriodChange}
-        theme={theme}
-        onThemeChange={handleThemeChange}
-        showGrid={showGrid}
-        onGridToggle={handleGridToggle}
-        showVolume={showVolume}
-        onVolumeToggle={handleVolumeToggle}
-        onResetChart={handleResetChart}
-        onExportData={handleExportData}
-        onSaveSettings={handleSaveSettings}
-      />
-      <ChartArea 
-        data={klineData} 
-        indicators={indicators} 
-        theme={theme}
-        showGrid={showGrid}
-        showVolume={showVolume}
-        onCursorDataChange={setCursorData}
-      />
-      <InfoPanel data={klineData} cursorData={cursorData} />
+      <UserHeader user={currentUser || null} onLogout={handleLogout} />
+      <div className="dashboard-main">
+        <ControlPanel
+          indicators={indicators}
+          timeframes={mockTimeframes}
+          selectedTimeframe={selectedTimeframe}
+          onIndicatorToggle={handleIndicatorToggle}
+          onTimeframeChange={handleTimeframeChange}
+          onPeriodChange={handlePeriodChange}
+          theme={theme}
+          onThemeChange={handleThemeChange}
+          showGrid={showGrid}
+          onGridToggle={handleGridToggle}
+          showVolume={showVolume}
+          onVolumeToggle={handleVolumeToggle}
+          onResetChart={handleResetChart}
+          onExportData={handleExportData}
+          onSaveSettings={handleSaveSettings}
+        />
+        <ChartArea 
+          data={klineData} 
+          indicators={indicators} 
+          theme={theme}
+          showGrid={showGrid}
+          showVolume={showVolume}
+          onCursorDataChange={setCursorData}
+        />
+        <InfoPanel data={klineData} cursorData={cursorData} />
+      </div>
     </div>
   );
 }
 
-export default function Dashboard() {
-  return <DashboardLayout />;
+interface DashboardProps {
+  onLogout?: () => void;
+  currentUser?: User | null;
+}
+
+export default function Dashboard({ onLogout, currentUser }: DashboardProps) {
+  return <DashboardLayout onLogout={onLogout} currentUser={currentUser} />;
 }
