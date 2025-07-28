@@ -278,8 +278,8 @@ function ChartArea({
           styles:{
             candle:{
               tooltip:{
-                showRule:'follow_cross',
-                showType:'rect',
+                showRule:'none',
+                showType:'standard',
               }
             }
           },
