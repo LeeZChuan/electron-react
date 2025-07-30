@@ -16,7 +16,7 @@ const getKLineChart = () => {
 };
 
 // 生成初始 mock 数据
-const mockKlineData: KLineData[] = generateMockKlineData(30, '1m'); // 生成30天的分钟级数据
+const mockKlineData: KLineData[] = generateMockKlineData(14, '1m'); // 生成14天的分钟级数据
 
 const mockIndicators = [
   { name: 'MA', enabled: true, period: 20, color: '#FF6B6B' },
@@ -187,7 +187,8 @@ function ChartArea({
   theme, 
   showGrid, 
   showVolume,
-  onCursorDataChange
+  onCursorDataChange,
+  selectedTimeframe
 }: { 
   data: KLineData[]; 
   indicators: typeof mockIndicators;
@@ -195,6 +196,7 @@ function ChartArea({
   showGrid: boolean;
   showVolume: boolean;
   onCursorDataChange?: (data: KLineData | null) => void;
+  selectedTimeframe: string;
 }) {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<any>(null);
@@ -334,7 +336,7 @@ function ChartArea({
 
         chartInstance.current.setSymbol({ ticker: '行情图坐标轴' })
         chartInstance.current.setPeriod({ span: 1, type: 'minute' })
-        chartInstance.current.setBarSpace(2)
+        chartInstance.current.setBarSpace(2)  
         // 设置数据
         chartInstance.current.setDataLoader({
           getBars: ({ callback }: { callback: (data: KLineData[]) => void }) => {
@@ -597,6 +599,79 @@ function ChartArea({
     }
   }, [indicators]);
 
+  // 监听时间周期变化，更新图表设置
+  useEffect(() => {
+    const klinecharts = getKLineChart();
+    if (chartInstance.current && klinecharts && isChartInitialized) {
+      try {
+        let periodSpan = 1;
+        let periodType = 'minute' as 'minute' | 'hour' | 'day' | 'week';
+        let barSpace = 2;
+        
+        // 根据时间周期设置图表参数
+        switch (selectedTimeframe) {
+          case '1m':
+            periodSpan = 1;
+            periodType = 'minute';
+            barSpace = 1;
+            break;
+          case '5m':
+            periodSpan = 5;
+            periodType = 'minute';
+            barSpace = 2;
+            break;
+          case '15m':
+            periodSpan = 15;
+            periodType = 'minute';
+            barSpace = 3;
+            break;
+          case '30m':
+            periodSpan = 30;
+            periodType = 'minute';
+            barSpace = 4;
+            break;
+          case '1h':
+            periodSpan = 1;
+            periodType = 'hour';
+            barSpace = 6;
+            break;
+          case '4h':
+            periodSpan = 4;
+            periodType = 'hour';
+            barSpace = 8;
+            break;
+          case '1d':
+            periodSpan = 1;
+            periodType = 'day';
+            barSpace = 12;
+            break;
+          case '1w':
+            periodSpan = 7;
+            periodType = 'day';
+            barSpace = 20;
+            break;
+          default:
+            periodSpan = 1;
+            periodType = 'hour';
+            barSpace = 6;
+        }
+        
+        // 更新时间周期设置
+        chartInstance.current.setPeriod({ 
+          span: periodSpan, 
+          type: periodType 
+        });
+        
+        // 更新K线间距
+        chartInstance.current.setBarSpace(barSpace);
+        
+        console.log('图表设置已更新:', { periodSpan, periodType, barSpace, selectedTimeframe });
+      } catch (error) {
+        console.error('更新图表设置失败:', error);
+      }
+    }
+  }, [selectedTimeframe, isChartInitialized]);
+
   return (
     <div className="chart-area">
       
@@ -799,6 +874,96 @@ function DashboardLayout({ onLogout, currentUser }: DashboardLayoutProps) {
   const handleTimeframeChange = (timeframe: string) => {
     setSelectedTimeframe(timeframe);
     console.log('切换时间周期:', timeframe);
+    
+    // 根据时间周期生成新的K线数据
+    let dataPoints = 30; // 默认30天
+    let interval: '1m' | '5m' | '15m' | '30m' | '1h' | '4h' | '1d' = '1m'; // 默认1分钟
+    let periodSpan = 1; // 默认周期跨度
+    let periodType = 'minute' as 'minute' | 'hour' | 'day' | 'week'; // 默认周期类型
+    let barSpace = 2; // 默认K线间距
+    
+    // 根据时间周期调整数据点数量和间隔
+    switch (timeframe) {
+      case '1m':
+        dataPoints = 14 * 24 * 60; // 14天的分钟数据
+        interval = '1m';
+        periodSpan = 1;
+        periodType = 'minute';
+        barSpace = 1; // 分钟级数据间距较小
+        break;
+      case '5m':
+        dataPoints = 14 * 24 * 12; // 14天的5分钟数据
+        interval = '5m';
+        periodSpan = 5;
+        periodType = 'minute';
+        barSpace = 2;
+        break;
+      case '15m':
+        dataPoints = 14 * 24 * 4; // 14天的15分钟数据
+        interval = '15m';
+        periodSpan = 15;
+        periodType = 'minute';
+        barSpace = 3;
+        break;
+      case '30m':
+        dataPoints = 14 * 24 * 2; // 14天的30分钟数据
+        interval = '30m';
+        periodSpan = 30;
+        periodType = 'minute';
+        barSpace = 4;
+        break;
+      case '1h':
+        dataPoints = 14 * 24; // 14天的小时数据
+        interval = '1h';
+        periodSpan = 1;
+        periodType = 'hour';
+        barSpace = 6;
+        break;
+      case '4h':
+        dataPoints = 14 * 6; // 14天的4小时数据
+        interval = '4h';
+        periodSpan = 4;
+        periodType = 'hour';
+        barSpace = 8;
+        break;
+      case '1d':
+        dataPoints = 180; // 30天的日数据
+        interval = '1d';
+        periodSpan = 1;
+        periodType = 'day';
+        barSpace = 8;
+        break;
+      case '1w':
+        // 周数据使用日数据生成，然后手动调整时间间隔
+        dataPoints = 182; // 182周的周数据
+        interval = '1d'; // 使用日数据作为基础
+        periodSpan = 7;
+        periodType = 'day';
+        barSpace = 8;
+        break;
+      default:
+        dataPoints = 30 * 24; // 默认小时数据
+        interval = '1h';
+        periodSpan = 1;
+        periodType = 'hour';
+        barSpace = 6;
+    }
+    
+    // 生成新的K线数据
+    const newKlineData = generateMockKlineData(dataPoints, interval);
+    
+    // 如果是周数据，需要调整时间戳间隔
+    if (timeframe === '1w') {
+      const weeklyData = newKlineData.map((data, index) => ({
+        ...data,
+        timestamp: data.timestamp + (index * 6 * 24 * 60 * 60 * 1000) // 每周间隔7天
+      }));
+      setKlineData(weeklyData);
+    } else {
+      setKlineData(newKlineData);
+    }
+    
+
   };
   
   const handlePeriodChange = (index: number, period: number) => {
@@ -889,6 +1054,7 @@ function DashboardLayout({ onLogout, currentUser }: DashboardLayoutProps) {
           showGrid={showGrid}
           showVolume={showVolume}
           onCursorDataChange={setCursorData}
+          selectedTimeframe={selectedTimeframe}
         />
         <InfoPanel data={klineData} cursorData={cursorData} />
       </div>
