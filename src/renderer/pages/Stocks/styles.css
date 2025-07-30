@@ -1,0 +1,283 @@
+/* Stocks页面样式 */
+.stocks-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f5f5f5;
+}
+
+.stocks-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* 左侧控制面板 */
+.control-panel {
+  width: 280px;
+  background: white;
+  border-right: 1px solid #e8e8e8;
+  padding: 20px;
+  overflow-y: auto;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+}
+
+.panel-section {
+  margin-bottom: 24px;
+}
+
+.panel-section h3 {
+  margin: 0 0 12px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* 时间周期按钮 */
+.timeframe-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.timeframe-btn {
+  padding: 8px 12px;
+  border: 1px solid #d9d9d9;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.timeframe-btn:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.timeframe-btn.active {
+  background: #1890ff;
+  color: white;
+  border-color: #1890ff;
+}
+
+/* 技术指标 */
+.indicators-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.indicator-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+  background: #fafafa;
+}
+
+.indicator-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.period-input {
+  width: 60px;
+  padding: 4px 8px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* 图表设置 */
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.setting-select {
+  padding: 4px 8px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* 快捷操作 */
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.action-btn {
+  padding: 8px 16px;
+  border: 1px solid #d9d9d9;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+/* 中间图表区域 */
+.chart-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  margin: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.chart-container {
+  flex: 1;
+  position: relative;
+}
+
+.kline-chart {
+  width: 100%;
+  height: 100%;
+}
+
+/* 右侧信息面板 */
+.info-panel {
+  width: 300px;
+  background: white;
+  border-left: 1px solid #e8e8e8;
+  padding: 20px;
+  overflow-y: auto;
+  box-shadow: -2px 0 4px rgba(0,0,0,0.1);
+}
+
+.panel-section {
+  margin-bottom: 24px;
+}
+
+.panel-section h3 {
+  margin: 0 0 12px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.market-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-row .price {
+  font-weight: 600;
+  color: #333;
+}
+
+.info-row .positive {
+  color: #52c41a;
+  font-weight: 600;
+}
+
+.info-row .negative {
+  color: #ff4d4f;
+  font-weight: 600;
+}
+
+.info-row.hint {
+  color: #999;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* 深色主题 */
+.stocks-container.dark {
+  background: #1a1a1a;
+}
+
+.stocks-container.dark .control-panel,
+.stocks-container.dark .info-panel {
+  background: #2a2a2a;
+  border-color: #404040;
+}
+
+.stocks-container.dark .panel-section h3 {
+  color: #e0e0e0;
+}
+
+.stocks-container.dark .timeframe-btn {
+  background: #2a2a2a;
+  border-color: #404040;
+  color: #e0e0e0;
+}
+
+.stocks-container.dark .timeframe-btn:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.stocks-container.dark .timeframe-btn.active {
+  background: #1890ff;
+  color: white;
+}
+
+.stocks-container.dark .indicator-item {
+  background: #333;
+  border-color: #404040;
+}
+
+.stocks-container.dark .setting-item {
+  border-color: #404040;
+}
+
+.stocks-container.dark .action-btn {
+  background: #2a2a2a;
+  border-color: #404040;
+  color: #e0e0e0;
+}
+
+.stocks-container.dark .info-row {
+  border-color: #404040;
+  color: #e0e0e0;
+}
+
+.stocks-container.dark .info-row .price {
+  color: #e0e0e0;
+}
+
+/* 子页面样式 */
+.stocks-sub-page {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.stocks-sub-page .stocks-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+} 
