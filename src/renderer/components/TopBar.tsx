@@ -18,11 +18,13 @@ export interface TopBarProps {
   onLogout: () => void;
   onPageChange?: (page: string) => void;
   onSubPageChange?: (subPage: string) => void;
+  theme?: 'dark' | 'light';
+  onThemeChange?: (theme: 'dark' | 'light') => void;
 }
 
-const TopBar: React.FC<TopBarProps> = ({ tabs, activeKey, user, onLogout, onPageChange, onSubPageChange }) => {
+const TopBar: React.FC<TopBarProps> = ({ tabs, activeKey, user, onLogout, onPageChange, onSubPageChange, theme = 'dark', onThemeChange }) => {
   return (
-    <div className="topbar-container">
+    <div className={`topbar-container ${theme}`}>
       <div className="topbar-tabs">
         {tabs.map(tab => (
           <a
@@ -46,9 +48,19 @@ const TopBar: React.FC<TopBarProps> = ({ tabs, activeKey, user, onLogout, onPage
         ))}
       </div>
       <div className="topbar-user">
+        {/* 换肤按钮 */}
+        <button 
+          className="theme-toggle-btn" 
+          onClick={() => onThemeChange?.(theme === 'dark' ? 'light' : 'dark')}
+          title={theme === 'dark' ? '切换到浅色主题' : '切换到深色主题'}
+        >
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
+        
         <div className="user-avatar">
           {user?.username?.charAt(0).toUpperCase() || 'U'}
         </div>
+        
         <div className="user-info">
           <div className="user-name">{user?.username || '用户'}</div>
           <div className="user-role">{user?.role === 'admin' ? '管理员' : '普通用户'}</div>

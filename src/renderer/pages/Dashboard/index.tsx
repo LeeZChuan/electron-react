@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './styles.css';
 import { User } from '../../utils/auth';
 import TopBar, { TopBarTab } from '../../components/TopBar';
@@ -14,6 +14,15 @@ interface DashboardLayoutProps {
 
 function DashboardLayout({ onLogout, currentUser, onPageChange, currentSubPage = 'stocks' }: DashboardLayoutProps) {
   const [currentSubPageState, setCurrentSubPageState] = useState(currentSubPage);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  // 初始化主题设置
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as 'dark' | 'light';
+    if (savedTheme) {
+      setTheme(savedTheme);
+    }
+  }, []);
 
   // 顶部导航栏tab配置
   const tabs: TopBarTab[] = [
@@ -40,6 +49,13 @@ function DashboardLayout({ onLogout, currentUser, onPageChange, currentSubPage =
     }
   };
 
+  // 处理主题切换
+  const handleThemeChange = (newTheme: 'dark' | 'light') => {
+    setTheme(newTheme);
+    // 保存主题设置到本地存储
+    localStorage.setItem('theme', newTheme);
+  };
+
   // 渲染子页面内容
   const renderSubPage = () => {
     switch (currentSubPageState) {
@@ -51,6 +67,8 @@ function DashboardLayout({ onLogout, currentUser, onPageChange, currentSubPage =
               currentUser={currentUser} 
               onPageChange={onPageChange}
               isSubPage={true}
+              theme={theme}
+              onThemeChange={handleThemeChange}
             />
           </div>
         );
@@ -209,7 +227,7 @@ function DashboardLayout({ onLogout, currentUser, onPageChange, currentSubPage =
   };
 
   return (
-    <div className={`dashboard-container dark`}>
+    <div className={`dashboard-container ${theme}`}>
       {/* 顶部导航栏 */}
       <TopBar
         tabs={tabs}
@@ -218,6 +236,8 @@ function DashboardLayout({ onLogout, currentUser, onPageChange, currentSubPage =
         onLogout={handleLogout}
         onPageChange={onPageChange}
         onSubPageChange={handleSubPageChange}
+        theme={theme}
+        onThemeChange={handleThemeChange}
       />
       <div className="dashboard-main">
         {renderSubPage()}

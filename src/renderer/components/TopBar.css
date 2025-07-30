@@ -9,6 +9,13 @@
   padding: 0 32px;
   position: relative;
   z-index: 10;
+  transition: all 0.3s ease;
+}
+
+/* 深色主题样式 */
+.topbar-container.dark {
+  background: #2a2a2a;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
 .topbar-tabs {
@@ -31,9 +38,20 @@
   margin-right: 2px;
 }
 
+/* 深色主题样式 */
+.topbar-container.dark .topbar-tab {
+  color: #cccccc;
+}
+
 .topbar-tab:hover {
   background: #f0f5ff;
   color: #1890ff;
+}
+
+/* 深色主题悬停样式 */
+.topbar-container.dark .topbar-tab:hover {
+  background: #3a3a3a;
+  color: #ffffff;
 }
 
 .topbar-tab.active {
@@ -49,6 +67,47 @@
   background: #f7f8fa;
   border-radius: 20px;
   padding: 4px 16px 4px 8px;
+  transition: all 0.3s ease;
+}
+
+/* 深色主题样式 */
+.topbar-container.dark .topbar-user {
+  background: #3a3a3a;
+}
+
+.theme-toggle-btn {
+  background: #fff;
+  color: #666;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-right: 8px;
+}
+
+.theme-toggle-btn:hover {
+  background: #f0f0f0;
+  border-color: #999;
+  transform: scale(1.05);
+}
+
+/* 深色主题换肤按钮样式 */
+.topbar-container.dark .theme-toggle-btn {
+  background: #3a3a3a;
+  color: #ffffff;
+  border-color: #555;
+}
+
+.topbar-container.dark .theme-toggle-btn:hover {
+  background: #4a4a4a;
+  border-color: #666;
+  transform: scale(1.05);
 }
 
 .user-avatar {
@@ -75,11 +134,23 @@
   font-size: 15px;
   color: #333;
   font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+/* 深色主题样式 */
+.topbar-container.dark .user-name {
+  color: #ffffff;
 }
 
 .user-role {
   font-size: 12px;
   color: #999;
+  transition: color 0.3s ease;
+}
+
+/* 深色主题样式 */
+.topbar-container.dark .user-role {
+  color: #cccccc;
 }
 
 .logout-btn {

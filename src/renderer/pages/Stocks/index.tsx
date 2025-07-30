@@ -809,13 +809,17 @@ interface StocksLayoutProps {
   currentUser?: User | null;
   onPageChange?: (page: string) => void;
   isSubPage?: boolean;
+  theme?: 'dark' | 'light';
+  onThemeChange?: (theme: 'dark' | 'light') => void;
 }
 
-function StocksLayout({ onLogout, currentUser, onPageChange, isSubPage = false }: StocksLayoutProps) {
+function StocksLayout({ onLogout, currentUser, onPageChange, isSubPage = false, theme: externalTheme, onThemeChange: externalOnThemeChange }: StocksLayoutProps) {
   const [indicators, setIndicators] = useState(mockIndicators);
   const [selectedTimeframe, setSelectedTimeframe] = useState('1h');
   const [klineData, setKlineData] = useState<KLineData[]>(mockKlineData);
-  const [theme, setTheme] = useState('dark');
+  const [internalTheme, setInternalTheme] = useState('dark');
+  // 使用外部主题或内部主题
+  const theme = externalTheme || internalTheme;
   const [showGrid, setShowGrid] = useState(true);
   const [showVolume, setShowVolume] = useState(true);
   const [cursorData, setCursorData] = useState<KLineData | null>(null);
@@ -929,7 +933,11 @@ function StocksLayout({ onLogout, currentUser, onPageChange, isSubPage = false }
   };
   
   const handleThemeChange = (newTheme: string) => {
-    setTheme(newTheme);
+    if (externalOnThemeChange) {
+      externalOnThemeChange(newTheme as 'dark' | 'light');
+    } else {
+      setInternalTheme(newTheme);
+    }
   };
   
   const handleGridToggle = () => {
@@ -1080,8 +1088,10 @@ interface StocksProps {
   currentUser?: User | null;
   onPageChange?: (page: string) => void;
   isSubPage?: boolean;
+  theme?: 'dark' | 'light';
+  onThemeChange?: (theme: 'dark' | 'light') => void;
 }
 
-export default function Stocks({ onLogout, currentUser, onPageChange, isSubPage = false }: StocksProps) {
-  return <StocksLayout onLogout={onLogout} currentUser={currentUser} onPageChange={onPageChange} isSubPage={isSubPage} />;
+export default function Stocks({ onLogout, currentUser, onPageChange, isSubPage = false, theme, onThemeChange }: StocksProps) {
+  return <StocksLayout onLogout={onLogout} currentUser={currentUser} onPageChange={onPageChange} isSubPage={isSubPage} theme={theme} onThemeChange={onThemeChange} />;
 } 
