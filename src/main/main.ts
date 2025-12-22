@@ -9,6 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
+import fs from 'fs';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -29,6 +30,44 @@ ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
+});
+
+// 读取配置文件
+ipcMain.handle('read-config', async () => {
+  try {
+    const configPath = app.isPackaged
+      ? path.join(process.resourcesPath, 'config.json')
+      : path.join(__dirname, '../../config.json');
+    
+    const configData = fs.readFileSync(configPath, 'utf-8');
+    return { success: true, data: JSON.parse(configData) };
+  } catch (error) {
+    console.error('读取配置文件失败:', error);
+    return { 
+      success: false, 
+      error: '配置文件读取失败',
+      details: error instanceof Error ? error.message : String(error)
+    };
+  }
+});
+
+// 写入配置文件（可选功能）
+ipcMain.handle('write-config', async (_event, configData) => {
+  try {
+    const configPath = app.isPackaged
+      ? path.join(process.resourcesPath, 'config.json')
+      : path.join(__dirname, '../../config.json');
+    
+    fs.writeFileSync(configPath, JSON.stringify(configData, null, 2), 'utf-8');
+    return { success: true };
+  } catch (error) {
+    console.error('写入配置文件失败:', error);
+    return { 
+      success: false, 
+      error: '配置文件写入失败',
+      details: error instanceof Error ? error.message : String(error)
+    };
+  }
 });
 
 if (process.env.NODE_ENV === 'production') {

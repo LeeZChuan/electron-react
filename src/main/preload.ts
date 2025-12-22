@@ -22,6 +22,11 @@ const electronHandler = {
       ipcRenderer.once(channel, (_event, ...args) => func(...args));
     },
   },
+  // 配置文件操作
+  config: {
+    read: () => ipcRenderer.invoke('read-config'),
+    write: (configData: any) => ipcRenderer.invoke('write-config', configData),
+  },
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);

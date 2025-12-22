@@ -250,7 +250,8 @@
       "output": "release/build"
     },
     "extraResources": [
-      "./assets/**"
+      "./assets/**",
+      "./config.json"
     ],
     "publish": {
       "provider": "github",

@@ -4,6 +4,7 @@ import { User } from '../../utils/auth';
 import TopBar, { TopBarTab } from '../../components/TopBar';
 import Stocks from '../Stocks';
 import Watchlist from '../Watchlist';
+import ExternalWebsite from '../ExternalWebsite';
 
 interface DashboardLayoutProps {
   onLogout?: () => void;
@@ -28,12 +29,13 @@ function DashboardLayout({ onLogout, currentUser, onPageChange, currentSubPage =
   const tabs: TopBarTab[] = [
     { key: 'watchlist', label: '自选股', href: '#/watchlist' },
     { key: 'market', label: '大盘', href: '#/market' },
-    { key: 'sectors', label: '板块', href: '#/sectors' },
-    { key: 'individual', label: '个股', href: '#/individual' },
-    { key: 'panorama', label: '全景', href: '#/panorama' },
-    { key: 'futures', label: '期货', href: '#/futures' },
-    { key: 'funds', label: '基金', href: '#/funds' },
-    { key: 'bonds', label: '债券', href: '#/bonds' },
+    // { key: 'sectors', label: '板块', href: '#/sectors' },
+    // { key: 'individual', label: '个股', href: '#/individual' },
+    // { key: 'panorama', label: '全景', href: '#/panorama' },
+    // { key: 'futures', label: '期货', href: '#/futures' },
+    // { key: 'funds', label: '基金', href: '#/funds' },
+    // { key: 'bonds', label: '债券', href: '#/bonds' },
+    { key: 'external', label: '内嵌网站', href: '#/external' },
     { key: 'stocks', label: '股票', href: '#/stocks' },
   ];
 
@@ -210,6 +212,18 @@ function DashboardLayout({ onLogout, currentUser, onPageChange, currentSubPage =
                 <p>债券页面开发中...</p>
               </div>
             </div>
+          </div>
+        );
+      case 'external':
+        return (
+          <div className="sub-page-wrapper" style={{ height: '100%' }}>
+            <ExternalWebsite 
+              onLogout={handleLogout} 
+              currentUser={currentUser} 
+              onPageChange={onPageChange}
+              isSubPage={true}
+              theme={theme}
+            />
           </div>
         );
       default:
